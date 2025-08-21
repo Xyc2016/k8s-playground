@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fstack-be
-        image: 192.168.49.2:5000/fstack-be
+        image: 192.168.49.2:5000/fstack-be:latest
         imagePullPolicy: Always
         resources:
           requests:
@@ -52,6 +52,9 @@ data:
         listen 80;
         server_name localhost;
 
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
         location /api {
             proxy_pass http://fstack-be:8000; # Forward requests to Gunicorn
             proxy_set_header Host $host;
@@ -59,9 +62,18 @@ data:
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 
-        # Example for serving static files (optional)
+        location /static/ {
+            alias /usr/share/nginx/html/static/;
+            # 设置一年缓存，并标记为不可变
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # 处理所有其他请求（如 index.html）：不缓存或短期缓存
         location / {
             alias /usr/share/nginx/html/;
+            # 核心设置：确保 HTML 文件不被浏览器缓存
+            add_header Cache-Control "no-cache, must-revalidate";
         }
     }
 ---
@@ -87,7 +99,7 @@ spec:
             name: nginx-conf-configmap
       initContainers:
       - name: fstack-fe-dist
-        image: 192.168.49.2:5000/fstack-fe
+        image: 192.168.49.2:5000/fstack-fe:latest
         command: ["sh", "-c", "cp -r /app/dist/* /shared-data/"]
         volumeMounts:
           - name: shared-data
@@ -96,7 +108,7 @@ spec:
       containers:
 
       - name: fstack-fe-nginx
-        image: nginx
+        image: nginx:alpine
         volumeMounts:
           - name: shared-data
             mountPath: /usr/share/nginx/html
@@ -104,11 +116,11 @@ spec:
             mountPath: /etc/nginx/conf.d/
         resources:
           requests:
+            cpu: 50m  # Nginx 通常需要较少 CPU
+            memory: 50Mi
+          limits:
             cpu: 100m
             memory: 100Mi
-          limits:
-            cpu: 200m
-            memory: 200Mi
         ports:
         - containerPort: 80
 ---
@@ -121,7 +133,35 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8000
+  - port: 80
     targetPort: 80
   selector:
     app: fstack-fe
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fstack-ingress
+  annotations:
+    # 可选：如果您需要更复杂的重写规则，可以使用这些注解
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  # 定义规则1：使用自定义域名（需要通过hosts文件解析）
+  - host: fstack.local # 您喜欢的任何域名
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fstack-fe  # 指向您的前端 Service
+            port:
+              number: 80   # 前端 Service 的端口
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: fstack-be  # 指向您的后端 Service
+            port:
+              number: 8000   # 后端 Service 的端口
