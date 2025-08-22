@@ -1,4 +1,8 @@
 gitea:
   config:
+    server:
+      DOMAIN: gitea-local
+      SSH_DOMAIN: gitea-local
+      ROOT_URL: http://gitea-local/
     webhook:
       ALLOWED_HOST_LIST: "*"
