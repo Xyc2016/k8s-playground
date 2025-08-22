@@ -6,3 +6,4 @@ env:
   DRONE_RPC_SECRET: 4f65d8eb19f6fea0b443606158ad8042
   DRONE_SERVER_HOST: drone-local
   DRONE_SERVER_PROTO: http
+  DRONE_USER_CREATE: username:xuyucai,admin:true
