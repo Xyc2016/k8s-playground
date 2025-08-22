@@ -4,5 +4,5 @@ env:
   DRONE_GITEA_SERVER: http://gitea-local
   DRONE_GIT_ALWAYS_AUTH: false
   DRONE_RPC_SECRET: 4f65d8eb19f6fea0b443606158ad8042
-  DRONE_SERVER_HOST: drone.local
+  DRONE_SERVER_HOST: drone-local
   DRONE_SERVER_PROTO: http

@@ -1,0 +1,4 @@
+gitea:
+  config:
+    webhook:
+      ALLOWED_HOST_LIST: "*"
