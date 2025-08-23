@@ -132,3 +132,86 @@ spec:
           value: http
         - name: DRONE_RPC_SECRET
           value: 4f65d8eb19f6fea0b443606158ad8042
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: default
+  name: drone
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/log
+  verbs:
+  - get
+  - create
+  - delete
+  - list
+  - watch
+  - update
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: drone
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: Role
+  name: drone
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: drone-ci-agent
+  namespace: default # Drone 要操作的命名空间
+
+---
+# 创建一个 Role，定义 Drone 具体需要哪些权限
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: drone-deployer
+rules:
+- apiGroups: ["apps", ""] # "" 代表核心 API 组
+  resources: ["deployments", "pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+# 将 Role 绑定到 ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: drone-deployer-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: drone-ci-agent
+  namespace: default
+roleRef:
+  kind: Role
+  name: drone-deployer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: drone-ci-agent-token
+  annotations:
+    kubernetes.io/service-account.name: drone-ci-agent
+type: kubernetes.io/service-account-token
