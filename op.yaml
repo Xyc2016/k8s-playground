@@ -1,3 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: builder
+  labels:
+    app: builder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: builder
+  template:
+    metadata:
+      labels:
+        app: builder
+    spec:
+      containers:
+      - name: dind
+        image: docker:dind
+        args:
+          - "--host=tcp://0.0.0.0:2375"
+          - "--host=unix:///var/run/docker.sock"
+          - "--insecure-registry=192.168.49.2:5000"
+        securityContext:
+          privileged: true
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: builder
+spec:
+  selector:
+    app: builder
+  ports:
+  - protocol: TCP
+    port: 2375
+    targetPort: 2375
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
