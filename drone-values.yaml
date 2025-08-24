@@ -1,6 +1,6 @@
 env:
-  DRONE_GITEA_CLIENT_ID: 017ae3c7-49b7-40dc-a1f8-da0399c50376
-  DRONE_GITEA_CLIENT_SECRET: gto_id7qeizo3az6zoe65uqwzljmmr2a7dodxi2ua3jvk2wro2x3qrxq
+  DRONE_GITEA_CLIENT_ID: 516841a2-26d3-4fb8-81eb-395c56797f7b
+  DRONE_GITEA_CLIENT_SECRET: gto_7zekpaikwrfqf6rp2qpsyong46gnkks67w4qm5houn6m2wthbveq
   DRONE_GITEA_SERVER: http://gitea-local
   DRONE_GIT_ALWAYS_AUTH: false
   DRONE_RPC_SECRET: 4f65d8eb19f6fea0b443606158ad8042
