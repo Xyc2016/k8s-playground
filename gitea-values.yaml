@@ -6,3 +6,11 @@ gitea:
       ROOT_URL: http://gitea-local/
     webhook:
       ALLOWED_HOST_LIST: "*"
+valkey:
+  enabled: true
+valkey-cluster:
+  enabled: false
+postgresql-ha:
+  enabled: false
+postgresql:
+  enabled: true
