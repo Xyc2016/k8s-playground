@@ -97,21 +97,12 @@ spec:
         - name: nginx-config-volume
           configMap:
             name: nginx-conf-configmap
-      initContainers:
-      - name: fstack-fe-dist
-        image: 192.168.49.2:5000/fstack-fe:latest
-        command: ["sh", "-c", "cp -r /app/dist/* /shared-data/"]
-        volumeMounts:
-          - name: shared-data
-            mountPath: /shared-data
 
       containers:
 
       - name: fstack-fe
-        image: nginx:alpine
+        image: 192.168.49.2:5000/fstack-fe:latest
         volumeMounts:
-          - name: shared-data
-            mountPath: /usr/share/nginx/html
           - name: nginx-config-volume
             mountPath: /etc/nginx/conf.d/
         resources:
