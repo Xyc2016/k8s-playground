@@ -215,3 +215,21 @@ metadata:
   annotations:
     kubernetes.io/service-account.name: drone-ci-agent
 type: kubernetes.io/service-account-token
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  annotations:
+spec:
+  rules:
+  - host: prometheus-stack-grafana # 和service name一致
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-stack-grafana # ClusterIP
+            port:
+              number: 80
