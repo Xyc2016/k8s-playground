@@ -107,7 +107,7 @@ spec:
 
       containers:
 
-      - name: fstack-fe-nginx
+      - name: fstack-fe
         image: nginx:alpine
         volumeMounts:
           - name: shared-data
