@@ -117,11 +117,11 @@ spec:
             mountPath: /etc/nginx/conf.d/
         resources:
           requests:
-            cpu: 100m  # Nginx 通常需要较少 CPU
-            memory: 100Mi
+            cpu: 50m  # Nginx 通常需要较少 CPU
+            memory: 50Mi
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 100m
+            memory: 100Mi
         ports:
         - containerPort: 80
 ---
