@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: fstack-be
+      annotations:
+        prometheus.io/scrape: "true"    # 允许 Prometheus 抓取
+        prometheus.io/path: "/metrics"  # 指标路径（默认是 /metrics，可省略）
+        prometheus.io/port: "8000"      # 指标暴露的端口
     spec:
       containers:
       - name: fstack-be
@@ -30,6 +34,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fstack-be
+  annotations:
+    # 最关键的两个注解：开启抓取并指定端口
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"  # 必须修改：这是您 Flask App 内部暴露 metrics 的端口
+    # 可选注解：如果您的 metrics 路径不是 /metrics，需要指定
+    prometheus.io/path: "/metrics"
   labels:
     app: fstack-be
 spec:
