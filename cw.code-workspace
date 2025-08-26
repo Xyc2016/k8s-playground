@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../fstack"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../flask-project"
+		},
+		{
+			"path": "../rsbuild-project"
+		},
+		{
+			"path": "../k8s-learn"
+		}
+	],
+	"settings": {}
+}
