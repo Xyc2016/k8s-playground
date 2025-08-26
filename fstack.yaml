@@ -102,8 +102,6 @@ spec:
         app: fstack-fe
     spec:
       volumes:
-        - name: shared-data
-          emptyDir: {}
         - name: nginx-config-volume
           configMap:
             name: nginx-conf-configmap
