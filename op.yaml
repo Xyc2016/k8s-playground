@@ -233,3 +233,22 @@ spec:
             name: prometheus-stack-grafana # ClusterIP
             port:
               number: 80
+---
+# 为了支持在Cluster外可以git remote ssh. 需要搭配kubectl port-forward
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: gitea
+  name: gitea-local-ssh
+  namespace: default
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+  - name: ssh
+    port: 22
+    targetPort: 2222
+  selector:
+    app.kubernetes.io/instance: gitea
+    app.kubernetes.io/name: gitea
+  type: ClusterIP
