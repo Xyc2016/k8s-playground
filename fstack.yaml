@@ -145,6 +145,10 @@ metadata:
     # 可选：如果您需要更复杂的重写规则，可以使用这些注解
     # nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  tls: # 添加 TLS 配置
+  - hosts:
+    - fstack.local
+    secretName: fstack-local-tls # 指向刚才创建的 Secret
   rules:
   # 定义规则1：使用自定义域名（需要通过hosts文件解析）
   - host: fstack.local # 您喜欢的任何域名
