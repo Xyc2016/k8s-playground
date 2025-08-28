@@ -1,0 +1,106 @@
+apiVersion: apps/v1 #  for k8s versions before 1.9.0 use apps/v1beta2  and before 1.8.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: fstack-be
+spec:
+  selector:
+    matchLabels:
+      app: fstack-be
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: fstack-be
+      annotations:
+        prometheus.io/scrape: "true"    # 允许 Prometheus 抓取
+        prometheus.io/path: "/metrics"  # 指标路径（默认是 /metrics，可省略）
+        prometheus.io/port: "8000"      # 指标暴露的端口
+    spec:
+      containers:
+      - name: fstack-be
+        image: 192.168.49.2:5000/fstack-be:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: 8000
+          initialDelaySeconds: 1
+          periodSeconds: 1
+          timeoutSeconds: 2
+          failureThreshold: 5
+          successThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fstack-be
+  annotations:
+    # 最关键的两个注解：开启抓取并指定端口
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"  # 必须修改：这是您 Flask App 内部暴露 metrics 的端口
+    # 可选注解：如果您的 metrics 路径不是 /metrics，需要指定
+    prometheus.io/path: "/metrics"
+  labels:
+    app: fstack-be
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: fstack-be
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf-configmap
+data:
+  default.conf: |
+    access_log /dev/stdout;
+    error_log /dev/stderr;
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+        location /api {
+            proxy_pass http://fstack-be:8000; # Forward requests to Gunicorn
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /static/ {
+            alias /usr/share/nginx/html/static/;
+            # 设置一年缓存，并标记为不可变
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # 处理所有其他请求（如 index.html）：不缓存或短期缓存
+        location / {
+            alias /usr/share/nginx/html/;
+            # 核心设置：确保 HTML 文件不被浏览器缓存
+            add_header Cache-Control "no-cache, must-revalidate";
+        }
+    }

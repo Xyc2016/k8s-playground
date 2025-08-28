@@ -1,0 +1,4 @@
+resources:
+- be.yaml
+- fe.yaml
+- redis.yaml
